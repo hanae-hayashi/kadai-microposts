@@ -32,7 +32,8 @@ class User extends Authenticatable
         return $this->hasMany(Micropost::class);
     }
     
-    public function followings(){
+    public function followings()
+    {
         return $this->belongsToMany(User::class, 'user_follow', 'user_id', 'follow_id')->withTimestamps();
     }
     
@@ -41,13 +42,15 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'user_follow', 'follow_id', 'user_id')->withTimestamps();
     }
     
-    public function follow($userId){
+    public function follow($userId)
+    {
         // 既にフォローしているかの確認
         $exist = $this->is_following($userId);
         // 相手が自分自身ではないかの確認
         $its_me = $this->id == $userId;
     
-        if ($exist || $its_me) {
+        if ($exist || $its_me)
+        {
             // 既にフォローしていれば何もしない
             return false;
         } else {
@@ -64,7 +67,8 @@ class User extends Authenticatable
         // 相手が自分自身ではないかの確認
         $its_me = $this->id == $userId;
     
-        if ($exist && !$its_me) {
+        if ($exist && !$its_me)
+        {
             // 既にフォローしていればフォローを外す
             $this->followings()->detach($userId);
             return true;
@@ -86,6 +90,46 @@ class User extends Authenticatable
         return Micropost::whereIn('user_id', $follow_user_ids);
     }
     
+    public function favorites()
+    {
+        return $this->belongsToMany(Micropost::class, 'favorites', 'user_id', 'micropost_id')->withTimestamps();
+    }
     
+    public function favorite($micropostId)
+    {
+        // 既に追加しているかの確認
+        $exist = $this->is_favorite($micropostId);
+
+        if ($exist)
+        {
+            // 既に追加していれば何もしない
+            return false;
+        } else {
+            // 未追加であれば追加する
+            $this->favorites()->attach($micropostId);
+            return true;
+        }
+    }
+    
+    public function unfavorite($micropostId)
+    {
+        // 既に追加しているかの確認
+        $exist = $this->is_favorite($micropostId);
+
+        if ($exist)
+        {
+            // 既に追加していれば外す
+            $this->favorites()->detach($micropostId);
+            return true;
+        } else {
+            // 未追加であれば何もしない
+            return false;
+        }
+    }
+    
+    public function is_favorite($micropostId)
+    {
+        return $this->favorites()->where('micropost_id', $micropostId)->exists();
+    }
     
 }
