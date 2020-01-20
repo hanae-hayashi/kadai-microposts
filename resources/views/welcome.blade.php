@@ -3,18 +3,11 @@
 @section('content')
     @if (Auth::check())
         <div class="row">
-            <aside class="col-sm2">
+            <aside class="col-sm-3">
                 @include('users.card', ['user' => Auth::user()])
+                @include('users.post_form', ['user' => $user])
             </aside>
             <div class="col-sm-8">
-                @if (Auth::id() == $user->id)
-                    {!! Form::open(['route' => 'microposts.store']) !!}
-                        <div class="form-group">
-                            {!! Form::textarea('content', old('content'), ['class' => 'form-control', 'rows' => '2']) !!}
-                            {!! Form::submit('Post', ['class' => 'btn btn-outline-info btn-block']) !!}
-                        </div>
-                    {!! Form::close() !!}
-                @endif
                 @if (count($microposts) > 0)
                     @include('microposts.microposts', ['microposts' => $microposts])
                 @endif
